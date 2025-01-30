@@ -166,14 +166,14 @@ local function createConfigOption(label, defaultValue, callback, parentFrame)
 	end)
 end
 
--- Criando as configurações para a primeira coluna
+-- Criando as configurações para a primeira coluna (lado esquerdo)
 createConfigOption("Quantidade", rainCount, function(value) rainCount = value end, leftFrame)
 createConfigOption("Velocidade da Chuva", rainDropSpeed, function(value) rainDropSpeed = value end, leftFrame)
 createConfigOption("Largura", rainDropWidth, function(value) rainDropWidth = value end, leftFrame)
 createConfigOption("Altura das Gotas", rainDropHeight, function(value) rainDropHeight = value end, leftFrame)
+createConfigOption("Raio da Chuva", areaRadius, function(value) areaRadius = value end, leftFrame)  -- Mudado para o leftFrame
 
 -- Criando as configurações para a segunda coluna
-createConfigOption("Raio da Chuva", areaRadius, function(value) areaRadius = value end, rightFrame)
 createConfigOption("Transparência", transparency, function(value) transparency = value end, rightFrame)
 createConfigOption("Tempo de Vida", lifeTime, function(value) lifeTime = value end, rightFrame)
 createConfigOption("Profundidade", rainDropDepth, function(value) rainDropDepth = value end, rightFrame)
