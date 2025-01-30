@@ -95,8 +95,8 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 -- Frame principal para a interface (ajustado para dispositivos móveis)
 local mainFrame = Instance.new("Frame")
 mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, 400, 0, 400) -- Expandido para o lado direito
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -220)
+mainFrame.Size = UDim2.new(0, 200, 0, 300) -- "Achatar" o layout (diminuir a altura)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -150) -- Ajuste a posição para centralizar melhor
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.5
 mainFrame.Visible = false -- Começa minimizado
