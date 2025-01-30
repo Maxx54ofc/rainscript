@@ -75,9 +75,8 @@ local function toggleRain()
 end
 
 -- Função para monitorar a morte do jogador e parar a chuva
-local function onPlayerDeath(player)
-    -- Quando o personagem morrer, desativa a chuva
-    rainEnabled = false
+local function onPlayerDeath()
+    rainEnabled = false -- Desativa a chuva quando o jogador morrer
 end
 
 -- Monitorar a morte do jogador
@@ -85,7 +84,7 @@ local player = game.Players.LocalPlayer
 player.CharacterAdded:Connect(function(character)
     -- Monitorar a morte do personagem
     character:WaitForChild("Humanoid").Died:Connect(function()
-        onPlayerDeath(player)
+        onPlayerDeath() -- Chama a função para desativar a chuva quando o jogador morrer
     end)
 end)
 
