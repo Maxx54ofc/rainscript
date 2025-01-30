@@ -78,8 +78,6 @@ end
 local function onPlayerDeath(player)
     -- Quando o personagem morrer, desativa a chuva
     rainEnabled = false
-    -- Aqui, também podemos garantir que a interface do jogador seja escondida
-    mainFrame.Visible = false
 end
 
 -- Monitorar a morte do jogador
