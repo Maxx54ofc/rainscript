@@ -95,8 +95,8 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 -- Frame principal para a interface (ajustado para dispositivos móveis)
 local mainFrame = Instance.new("Frame")
 mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, 200, 0, 400) -- Reduzindo o tamanho do layout
-mainFrame.Position = UDim2.new(0.5, -100, 0.5, -220)
+mainFrame.Size = UDim2.new(0, 400, 0, 400) -- Expandido para o lado direito
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -220)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.5
 mainFrame.Visible = false -- Começa minimizado
@@ -179,6 +179,10 @@ createConfigOption("Altura das Gotas", rainDropHeight, function(value) rainDropH
 createConfigOption("Raio da Chuva", areaRadius, function(value) areaRadius = value end)
 createConfigOption("Transparência das Gotas", transparency, function(value) transparency = value end)
 createConfigOption("Tempo de Vida das Gotas", lifeTime, function(value) lifeTime = value end)
+
+-- Novas opções: Profundidade das Gotas e Altura em relação ao jogador
+createConfigOption("Profundidade das Gotas", rainDropDepth, function(value) rainDropDepth = value end)
+createConfigOption("Altura das Gotas em Relação ao Jogador", rainHeight, function(value) rainHeight = value end)
 
 -- Criando o botão para alternar a interface
 toggleButton.MouseButton1Click:Connect(function()
