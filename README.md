@@ -79,11 +79,11 @@ local player = game.Players.LocalPlayer
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Frame principal para a interface
+-- Frame principal para a interface (ajustado para dispositivos móveis)
 local mainFrame = Instance.new("Frame")
 mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, 300, 0, 600)  -- Tamanho maior para acomodar todas as configurações
-mainFrame.Position = UDim2.new(0, 10, 0, 70)  -- Ajustando para começar abaixo do botão
+mainFrame.Size = UDim2.new(0, 200, 0, 400)  -- Reduzindo o tamanho do layout
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -220)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.5
 mainFrame.Visible = false -- Começa minimizado
@@ -93,14 +93,14 @@ local uiListLayout = Instance.new("UIListLayout")
 uiListLayout.Parent = mainFrame
 uiListLayout.FillDirection = Enum.FillDirection.Vertical -- Organiza as opções em uma coluna
 uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-uiListLayout.Padding = UDim.new(0, 10) -- Espaçamento entre as opções
+uiListLayout.Padding = UDim.new(0, 8) -- Diminuindo o espaçamento entre as opções
 
--- Botão para abrir/fechar a interface
+-- Botão para abrir/fechar a interface (ajustado para dispositivos móveis)
 local toggleButton = Instance.new("TextButton")
 toggleButton.Parent = screenGui
-toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Size = UDim2.new(0, 80, 0, 40) -- Botão menor
 toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.Text = "Configurações"
+toggleButton.Text = "Config"
 toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 
 -- Função para criar uma label e um campo de texto (entrada) para cada configuração
@@ -144,7 +144,7 @@ local function createRainToggleButton()
 	-- Criar o botão de ativar/desativar a chuva
 	local rainButton = Instance.new("TextButton")
 	rainButton.Parent = mainFrame
-	rainButton.Size = UDim2.new(1, 0, 0, 50)
+	rainButton.Size = UDim2.new(1, 0, 0, 40)  -- Botão menor
 	rainButton.Text = "Ativar Chuva"
 	rainButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 
@@ -194,6 +194,33 @@ end)
 
 -- Criando o botão de ativar/desativar a chuva
 createRainToggleButton()
+
+-- Função para permitir que a interface seja movida
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+mainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = mainFrame.Position
+	end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+mainFrame.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
 
 -- Inicia o efeito de chuva para o jogador
 startRainEffect(player)
