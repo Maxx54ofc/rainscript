@@ -20,7 +20,7 @@ local function createRainDrop(playerPosition)
 	rainDrop.Color = Color3.fromRGB(15, 119, 255)
 	rainDrop.Material = Enum.Material.SmoothPlastic
 	rainDrop.Anchored = false
-	rainDrop.CanCollide = true  -- A gota agora pode colidir com outros objetos
+	rainDrop.CanCollide = false  -- A gota agora pode colidir com outros objetos
 	rainDrop.Position = Vector3.new(playerPosition.X + randomX, playerPosition.Y + rainHeight, playerPosition.Z + randomZ)
 	rainDrop.Transparency = transparency
 
