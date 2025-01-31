@@ -74,7 +74,7 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 -- Frame principal da interface
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 400, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -190)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BackgroundTransparency = 0.5
 mainFrame.Visible = false
@@ -155,7 +155,7 @@ createConfigOption("Altura em Relação ao Jogador", rainHeight, function(value)
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 100, 0, 40)
 toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.Text = "Configurações"
+toggleButton.Text = "chuva config"
 toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 toggleButton.Parent = screenGui
 
@@ -210,3 +210,4 @@ end)
 
 -- Iniciar o efeito de chuva
 startRainEffect(player)
+
