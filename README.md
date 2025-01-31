@@ -1,57 +1,50 @@
--- Configurações iniciais da chuva
-local rainCount = 35 -- Quantidade de gotas de chuva
-local rainDropSpeed = 85 -- Velocidade das gotas de chuva
-local rainDropWidth = 0.2 -- Largura da gota
-local rainDropHeight = 6 -- Altura da gota
-local rainDropDepth = 0.1 -- Profundidade da gota
-local rainHeight = 35 -- Altura em que as gotas serão geradas acima do jogador
-local areaRadius = 50 -- Raio de 50 studs ao redor do jogador onde as gotas podem cair
-local transparency = 0.9 -- Transparência das gotas
-local lifeTime = 1 -- Tempo em segundos para as gotas sumirem
+-- Variáveis iniciais de configuração da chuva
+local rainCount = 35
+local rainDropSpeed = 85
+local rainDropWidth = 0.2
+local rainDropHeight = 6
+local rainDropDepth = 0.1
+local rainHeight = 35
+local areaRadius = 50
+local transparency = 0.9
+local lifeTime = 1
+local rainEnabled = false
 
-local rainDropShape = Enum.PartType.Block -- Altere para "Ball" se quiser esferas, ou remova para retângulo
-
-local rainEnabled = false -- Variável para controlar o estado da chuva (ativa/desativa)
-
--- Função para criar uma gota de chuva com formato e tamanho configuráveis
+-- Função para criar a gota de chuva
 local function createRainDrop(playerPosition)
-	-- Geração de posição aleatória dentro do raio
 	local randomX = math.random(-areaRadius, areaRadius)
 	local randomZ = math.random(-areaRadius, areaRadius)
 
-	-- Criar a parte da gota de chuva
 	local rainDrop = Instance.new("Part")
-	rainDrop.Size = Vector3.new(rainDropWidth, rainDropHeight, rainDropDepth) -- Tamanho modificado
-	rainDrop.Shape = rainDropShape  -- Define o formato da gota (pode ser "Ball" ou nada)
-	rainDrop.Color = Color3.fromRGB(15, 119, 255)  -- Cor azul para a chuva
+	rainDrop.Size = Vector3.new(rainDropWidth, rainDropHeight, rainDropDepth)
+	rainDrop.Color = Color3.fromRGB(15, 119, 255)
 	rainDrop.Material = Enum.Material.SmoothPlastic
 	rainDrop.Anchored = false
-	rainDrop.CanCollide = false
-	rainDrop.Position = Vector3.new(
-		playerPosition.X + randomX, -- Posição aleatória no eixo X
-		playerPosition.Y + rainHeight, -- Sempre acima do jogador
-		playerPosition.Z + randomZ  -- Posição aleatória no eixo Z
-	)
-
-	-- Definir a transparência das gotas
+	rainDrop.CanCollide = true  -- A gota agora pode colidir com outros objetos
+	rainDrop.Position = Vector3.new(playerPosition.X + randomX, playerPosition.Y + rainHeight, playerPosition.Z + randomZ)
 	rainDrop.Transparency = transparency
 
-	-- Criar o efeito suave de queda usando BodyVelocity
+	-- Quando a gota colide com algo, ela desaparece
+	rainDrop.Touched:Connect(function(hit)
+		-- Verifica se a gota tocou algo que não seja ela mesma
+		if hit and hit.Parent and hit.Parent:FindFirstChild("Humanoid") == nil then
+			rainDrop:Destroy()  -- Remove a gota ao colidir
+		end
+	end)
+
+	-- Adicionando a física da gota
 	local bodyVelocity = Instance.new("BodyVelocity")
-	bodyVelocity.Velocity = Vector3.new(0, -rainDropSpeed, 0) -- Gotas caindo para baixo suavemente
-	bodyVelocity.MaxForce = Vector3.new(10000, 10000, 10000) -- Força para garantir que a gota caia
+	bodyVelocity.Velocity = Vector3.new(0, -rainDropSpeed, 0)
+	bodyVelocity.MaxForce = Vector3.new(10000, 10000, 10000)
 	bodyVelocity.Parent = rainDrop
 
-	-- Adicionar a gota ao mundo
+	-- Adicionando a gota ao mundo
 	rainDrop.Parent = workspace
-
-	-- Função para destruir a gota após um tempo (lifeTime)
-	game:GetService("Debris"):AddItem(rainDrop, lifeTime)  -- A gota vai desaparecer após 'lifeTime' segundos
+	game:GetService("Debris"):AddItem(rainDrop, lifeTime)  -- Vai desaparecer após o tempo determinado
 end
 
--- Função para seguir o jogador e gerar a chuva ao redor dele
+-- Função para iniciar a chuva
 local function startRainEffect(player)
-	-- Criação de gotas de chuva continuamente enquanto o jogador está no jogo
 	while rainEnabled do
 		if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
 			local playerPosition = player.Character.HumanoidRootPart.Position
@@ -59,103 +52,83 @@ local function startRainEffect(player)
 				createRainDrop(playerPosition)
 			end
 		end
-		wait(0.1) -- Intervalo entre a criação das gotas para garantir um fluxo contínuo
+		wait(0.1)
 	end
 end
 
--- Função para alternar a chuva (ativar/desativar)
+-- Função para alternar o estado da chuva
 local function toggleRain()
 	rainEnabled = not rainEnabled
 	if rainEnabled then
-		startRainEffect(game.Players.LocalPlayer) -- Inicia a chuva
+		startRainEffect(game.Players.LocalPlayer)
 	else
-		-- Se a chuva for desativada, paramos o loop
-		-- (Não há uma forma fácil de interromper imediatamente, mas podemos simplesmente não chamar startRainEffect novamente)
+		-- O código para interromper a chuva pode ser adicionado aqui, mas por enquanto paramos o loop.
 	end
 end
 
--- Função para monitorar a morte do jogador e parar a chuva
-local function onPlayerDeath()
-	rainEnabled = false -- Desativa a chuva quando o jogador morrer
-end
-
--- Monitorar a morte do jogador
-local player = game.Players.LocalPlayer
-player.CharacterAdded:Connect(function(character)
-	-- Monitorar a morte do personagem
-	character:WaitForChild("Humanoid").Died:Connect(function()
-		onPlayerDeath() -- Chama a função para desativar a chuva quando o jogador morrer
-	end)
-end)
-
--- Criando a interface gráfica (GUI)
+-- Criando a interface gráfica
 local player = game.Players.LocalPlayer
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Frame principal para a interface (ajustado para dispositivos móveis)
+-- Frame principal da interface
 local mainFrame = Instance.new("Frame")
-mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, 400, 0, 200)  -- Novo tamanho para acomodar duas colunas
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -100)  -- Centralizado na tela
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.Size = UDim2.new(0, 400, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BackgroundTransparency = 0.5
-mainFrame.Visible = false -- Começa minimizado
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
 
--- Adicionando o layout para a primeira coluna (lado esquerdo)
+-- Layout para as opções da esquerda
 local leftFrame = Instance.new("Frame")
-leftFrame.Parent = mainFrame
-leftFrame.Size = UDim2.new(0.5, 0, 1, 0)  -- Metade do tamanho do mainFrame (primeira coluna)
+leftFrame.Size = UDim2.new(0.5, 0, 1, 0)
 leftFrame.Position = UDim2.new(0, 0, 0, 0)
-leftFrame.BackgroundTransparency = 1 -- Tornando transparente para não interferir no layout
+leftFrame.BackgroundTransparency = 1
+leftFrame.Parent = mainFrame
 
--- Adicionando o layout para a segunda coluna (lado direito)
+-- Layout para as opções da direita
 local rightFrame = Instance.new("Frame")
-rightFrame.Parent = mainFrame
-rightFrame.Size = UDim2.new(0.5, 0, 1, 0)  -- Metade do tamanho do mainFrame (segunda coluna)
+rightFrame.Size = UDim2.new(0.5, 0, 1, 0)
 rightFrame.Position = UDim2.new(0.5, 0, 0, 0)
-rightFrame.BackgroundTransparency = 1 -- Tornando transparente para não interferir no layout
+rightFrame.BackgroundTransparency = 1
+rightFrame.Parent = mainFrame
 
--- Layout para a primeira coluna (configurações da esquerda)
+-- UIListLayouts para as duas colunas
 local uiListLayoutLeft = Instance.new("UIListLayout")
-uiListLayoutLeft.Parent = leftFrame
 uiListLayoutLeft.FillDirection = Enum.FillDirection.Vertical
+uiListLayoutLeft.Padding = UDim.new(0, 10)
 uiListLayoutLeft.SortOrder = Enum.SortOrder.LayoutOrder
-uiListLayoutLeft.Padding = UDim.new(0, 8) -- Espaçamento entre os itens
+uiListLayoutLeft.Parent = leftFrame
 
--- Layout para a segunda coluna (configurações da direita)
 local uiListLayoutRight = Instance.new("UIListLayout")
-uiListLayoutRight.Parent = rightFrame
 uiListLayoutRight.FillDirection = Enum.FillDirection.Vertical
+uiListLayoutRight.Padding = UDim.new(0, 10)
 uiListLayoutRight.SortOrder = Enum.SortOrder.LayoutOrder
-uiListLayoutRight.Padding = UDim.new(0, 8) -- Espaçamento entre os itens
+uiListLayoutRight.Parent = rightFrame
 
--- Função para criar uma label e um campo de texto (entrada) para cada configuração
-local function createConfigOption(label, defaultValue, callback, parentFrame)
-	-- Criar a label para a configuração
+-- Função para criar uma opção de configuração
+local function createConfigOption(labelText, defaultValue, callback, parentFrame)
 	local labelFrame = Instance.new("Frame")
-	labelFrame.Size = UDim2.new(1, 0, 0, 40)
+	labelFrame.Size = UDim2.new(1, 0, 0, 50)
 	labelFrame.Parent = parentFrame
 
-	-- Label com o nome da configuração
-	local labelText = Instance.new("TextLabel")
-	labelText.Size = UDim2.new(0.4, 0, 1, 0)  -- Largura do nome da configuração
-	labelText.Text = label
-	labelText.BackgroundTransparency = 1
-	labelText.TextColor3 = Color3.fromRGB(255, 255, 255)
-	labelText.TextXAlignment = Enum.TextXAlignment.Left
-	labelText.Parent = labelFrame
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0.4, 0, 1, 0)
+	label.Text = labelText
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = labelFrame
 
-	-- Campo de entrada para a configuração
 	local inputBox = Instance.new("TextBox")
-	inputBox.Parent = labelFrame
-	inputBox.Size = UDim2.new(0.6, 0, 1, 0)  -- Largura do campo de entrada
+	inputBox.Size = UDim2.new(0.6, 0, 1, 0)
 	inputBox.Position = UDim2.new(0.4, 0, 0, 0)
 	inputBox.Text = tostring(defaultValue)
 	inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-	inputBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	inputBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	inputBox.Parent = labelFrame
 
-	-- Quando o valor do campo de texto for alterado, chama a função callback
 	inputBox.FocusLost:Connect(function(enterPressed)
 		if enterPressed then
 			local value = tonumber(inputBox.Text)
@@ -166,49 +139,37 @@ local function createConfigOption(label, defaultValue, callback, parentFrame)
 	end)
 end
 
--- Criando as configurações para a primeira coluna (lado esquerdo)
-createConfigOption("Quantidade", rainCount, function(value) rainCount = value end, leftFrame)
+-- Criando as opções de configuração na interface
+createConfigOption("Quantidade de Gotas", rainCount, function(value) rainCount = value end, leftFrame)
 createConfigOption("Velocidade da Chuva", rainDropSpeed, function(value) rainDropSpeed = value end, leftFrame)
-createConfigOption("Largura", rainDropWidth, function(value) rainDropWidth = value end, leftFrame)
+createConfigOption("Largura das Gotas", rainDropWidth, function(value) rainDropWidth = value end, leftFrame)
 createConfigOption("Altura das Gotas", rainDropHeight, function(value) rainDropHeight = value end, leftFrame)
-createConfigOption("Raio da Chuva", areaRadius, function(value) areaRadius = value end, leftFrame)  -- Mudado para o leftFrame
+createConfigOption("Raio da Chuva", areaRadius, function(value) areaRadius = value end, leftFrame)
 
--- Criando as configurações para a segunda coluna
 createConfigOption("Transparência", transparency, function(value) transparency = value end, rightFrame)
 createConfigOption("Tempo de Vida", lifeTime, function(value) lifeTime = value end, rightFrame)
-createConfigOption("Profundidade", rainDropDepth, function(value) rainDropDepth = value end, rightFrame)
-createConfigOption("Altura das Gotas em Relação ao Jogador", rainHeight, function(value) rainHeight = value end, rightFrame)
+createConfigOption("Profundidade das Gotas", rainDropDepth, function(value) rainDropDepth = value end, rightFrame)
+createConfigOption("Altura em Relação ao Jogador", rainHeight, function(value) rainHeight = value end, rightFrame)
 
--- Botão para abrir/fechar a interface (ajustado para dispositivos móveis)
+-- Botão para abrir e fechar a interface gráfica
 local toggleButton = Instance.new("TextButton")
-toggleButton.Parent = screenGui
-toggleButton.Size = UDim2.new(0, 80, 0, 40) -- Botão menor
+toggleButton.Size = UDim2.new(0, 100, 0, 40)
 toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.Text = "Config"
+toggleButton.Text = "Configurações"
 toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+toggleButton.Parent = screenGui
 
--- Função para mostrar/ocultar a interface
 toggleButton.MouseButton1Click:Connect(function()
 	mainFrame.Visible = not mainFrame.Visible
 end)
 
--- Função para criar a opção de ativar/desativar a chuva
-local function toggleRain()
-	rainEnabled = not rainEnabled
-	if rainEnabled then
-		startRainEffect(player)
-	else
-		-- Aqui paramos a chuva se for necessário.
-		-- Isso pode ser feito interrompendo o loop ou apenas não chamando mais a função startRainEffect.
-	end
-end
-
--- Criando o botão de ativar/desativar a chuva
+-- Botão de ativar/desativar a chuva (na coluna da direita, embaixo)
 local rainButton = Instance.new("TextButton")
-rainButton.Parent = mainFrame
-rainButton.Size = UDim2.new(1, 0, 0, 40) -- Botão menor
-rainButton.Text = "Ativar Chuva"
+rainButton.Size = UDim2.new(1, 0, 0, 40)  -- Fazendo o botão ocupar toda a largura da coluna
+rainButton.Position = UDim2.new(0, 0, 1, -50)  -- Colocando o botão na parte inferior
+rainButton.Text = "Ativar/Desativar Chuva"
 rainButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+rainButton.Parent = rightFrame  -- Colocando o botão dentro da coluna da direita
 
 rainButton.MouseButton1Click:Connect(function()
 	toggleRain()
@@ -218,6 +179,7 @@ rainButton.MouseButton1Click:Connect(function()
 		rainButton.Text = "Ativar Chuva"
 	end
 end)
+
 
 -- Função para permitir que a interface seja movida
 local dragging = false
@@ -246,5 +208,5 @@ mainFrame.InputEnded:Connect(function(input)
 	end
 end)
 
--- Inicia o efeito de chuva para o jogador
+-- Iniciar o efeito de chuva
 startRainEffect(player)
